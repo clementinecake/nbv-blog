@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>风一样的猪儿</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-y: auto; /* 确保可以上下滑动 */
+        }
+
+        header {
+            background-color: #000000;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+
+        main {
+            flex: 1;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .post, .media, .document {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .post h2, .media h2, .document h2 {
+            margin-top: 0;
+        }
+
+        .post img, .media img, .media video {
+            max-width: 100%;
+            height: auto;
+            margin-top: 1rem;
+            max-height: 200px; /* 限制图片和视频的最大高度 */
+        }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 0.5rem;
+        }
+
+        .delete-button {
+            background-color: #dc3545; /* 红色 */
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.3rem 0.5rem;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        footer {
+            text-align: center;
+            padding: 0.2rem 0; /* 缩小脚页 */
+            background-color: #000000;
+            color: white;
+            font-size: 0.6rem; /* 缩小字体 */
+        }
+
+        button {
+            background-color: #000000;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #333333;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .mode-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background-color: #000000;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .mode-toggle:hover {
+            background-color: #333333;
+        }
+
+        .dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        .dark-mode header,
+        .dark-mode footer {
+            background-color: #1f1f1f;
+        }
+
+        .dark-mode .post,
+        .dark-mode .media,
+        .dark-mode .document {
+            background-color: #1f1f1f;
+            box-shadow: 0 2px 4px rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode .timestamp {
+            color: #bbb;
+        }
+
+        .dark-mode button {
+            background-color: #1f1f1f;
+        }
+
+        .dark-mode button:hover {
+            background-color: #333;
+        }
+
+        .dark-mode .delete-button {
+            background-color: #dc3545;
+        }
+
+        .dark-mode .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80%;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            background-color: #dc3545;
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.3rem 0.5rem;
+            border: none;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .close-modal:hover {
+            background-color: #c82333;
+        }
+
+        .firework {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: #ff0000;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(10);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>风一样的猪儿</h1>
+    </header>
+    <main>
+        <section id="new-post">
+            <h2>创建新文章</h2>
+            <input type="text" id="post-title" placeholder="文章标题">
+            <textarea id="post-content" placeholder="在此输入内容"></textarea>
+            <input type="file" id="post-image" accept="image/*">
+            <button id="save-post">保存文章</button>
+        </section>
+        <section id="new-media">
+            <h2>上传文件</h2>
+            <input type="file" id="media-file" accept="image/*,video/*,.txt,.pdf">
+            <button id="upload-media">上传</button>
+        </section>
+        <section id="posts">
+            <h2>文章列表</h2>
+        </section>
+        <section id="files">
+            <h2>文件列表</h2>
+            <div id="images">
+                <h3>图片</h3>
+            </div>
+            <div id="documents">
+                <h3>文档</h3>
+            </div>
+            <div id="videos">
+                <h3>视频</h3>
+            </div>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; <span id="year"></span> 风一样的猪儿。版权所有。</p>
+    </footer>
+    <button class="mode-toggle" id="mode-toggle">夜晚模式</button>
+
+    <div class="modal" id="document-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal">关闭</button>
+            <div id="document-content"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="media-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-media-modal">关闭</button>
+            <div id="media-content"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('year').textContent = new Date().getFullYear();
+
+            document.getElementById('save-post').addEventListener('click', function() {
+                const title = document.getElementById('post-title').value;
+                const content = document.getElementById('post-content').value;
+                const image = document.getElementById('post-image').files[0];
+                const timestamp = new Date().toLocaleString();
+
+                const postSection = document.getElementById('posts');
+                const postDiv = document.createElement('div');
+                postDiv.classList.add('post');
+                postDiv.innerHTML = `<h2>${title}</h2><p>${content}</p><div class="timestamp">发布时间: ${timestamp}</div><button class="delete-button">删除</button>`;
+
+                if (image) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(image);
+                    img.onload = function() {
+                        URL.revokeObjectURL(img.src); // 释放内存
+                    };
+                    postDiv.appendChild(img);
+                }
+
+                postSection.appendChild(postDiv);
+
+                postDiv.querySelector('.delete-button').addEventListener('click', function() {
+                    postDiv.remove();
+                });
+
+                document.getElementById('post-title').value = '';
+                document.getElementById('post-content').value = '';
+                document.getElementById('post-image').value = '';
+            });
+
+            document.getElementById('upload-media').addEventListener('click', function() {
+                const file = document.getElementById('media-file').files[0];
+                const timestamp = new Date().toLocaleString();
+
+                if (file) {
+                    const imagesSection = document.getElementById('images');
+                    const documentsSection = document.getElementById('documents');
+                    const videosSection = document.getElementById('videos');
+                    const mediaDiv = document.createElement('div');
+                    mediaDiv.classList.add('media');
+                    mediaDiv.innerHTML = `<h2>${file.name}</h2><div class="timestamp">上传时间: ${timestamp}</div><button class="delete-button">删除</button>`;
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = URL.createObjectURL(file);
+                    downloadLink.download = file.name;
+                    downloadLink.textContent = '下载';
+                    downloadLink.style.display = 'block';
+                    downloadLink.style.marginTop = '0.5rem';
+
+                    if (file.type.startsWith('image/')) {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(file);
+                        link.textContent = file.name;
+                        link.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            const img = document.createElement('img');
+                            img.src = URL.createObjectURL(file);
+                            img.onload = function() {
+                                URL.revokeObjectURL(img.src); // 释放内存
+                            };
+                            const modal = document.getElementById('media-modal');
+                            const mediaContent = document.getElementById('media-content');
+                            mediaContent.innerHTML = '';
+                            mediaContent.appendChild(img);
+                            modal.style.display = 'flex';
+                        });
+                        mediaDiv.appendChild(link);
+                        mediaDiv.appendChild(downloadLink);
+                        imagesSection.appendChild(mediaDiv);
+                    } else if (file.type.startsWith('video/')) {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(file);
+                        link.textContent = file.name;
+                        link.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            const video = document.createElement('video');
+                            video.src = URL.createObjectURL(file);
+                            video.controls = true;
+                            video.onload = function() {
+                                URL.revokeObjectURL(video.src); // 释放内存
+                            };
+                            const modal = document.getElementById('media-modal');
+                            const mediaContent = document.getElementById('media-content');
+                            mediaContent.innerHTML = '';
+                            mediaContent.appendChild(video);
+                            modal.style.display = 'flex';
+                        });
+                        mediaDiv.appendChild(link);
+                        mediaDiv.appendChild(downloadLink);
+                        videosSection.appendChild(mediaDiv);
+                    } else if (file.type === 'application/pdf') {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(file);
+                        link.textContent = file.name;
+                        link.target = '_blank';
+                        link.onload = function() {
+                            URL.revokeObjectURL(link.href); // 释放内存
+                        };
+                        mediaDiv.appendChild(link);
+                        mediaDiv.appendChild(downloadLink);
+                        documentsSection.appendChild(mediaDiv);
+                    } else if (file.type === 'text/plain') {
+                        const link = document.createElement('a');
+                        link.href = '#';
+                        link.textContent = file.name;
+                        link.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const text = e.target.result;
+                                const modal = document.getElementById('document-modal');
+                                const documentContent = document.getElementById('document-content');
+                                documentContent.textContent = text;
+                                modal.style.display = 'flex';
+                            };
+                            reader.readAsText(file);
+                        });
+                        mediaDiv.appendChild(link);
+                        mediaDiv.appendChild(downloadLink);
+                        documentsSection.appendChild(mediaDiv);
+                    }
+
+                    mediaDiv.querySelector('.delete-button').addEventListener('click', function() {
+                        mediaDiv.remove();
+                    });
+
+                    document.getElementById('media-file').value = '';
+                }
+            });
+
+            const modeToggle = document.getElementById('mode-toggle');
+            modeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dark-mode')) {
+                    modeToggle.textContent = '日间模式';
+                } else {
+                    modeToggle.textContent = '夜晚模式';
+                }
+            });
+
+            document.getElementById('close-modal').addEventListener('click', function() {
+                document.getElementById('document-modal').style.display = 'none';
+            });
+
+            document.getElementById('close-media-modal').addEventListener('click', function() {
+                document.getElementById('media-modal').style.display = 'none';
+            });
+
+            document.addEventListener('click', function(event) {
+                const fireworkContainer = document.createElement('div');
+                fireworkContainer.style.position = 'absolute';
+                fireworkContainer.style.left = `${event.pageX}px`;
+                fireworkContainer.style.top = `${event.pageY}px`;
+                fireworkContainer.style.pointerEvents = 'none';
+                document.body.appendChild(fireworkContainer);
+
+                for (let i = 0; i < 20; i++) {
+                    const firework = document.createElement('div');
+                    firework.classList.add('firework');
+                    firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    firework.style.transform = `translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px)`;
+                    fireworkContainer.appendChild(firework);
+                }
+
+                setTimeout(() => {
+                    fireworkContainer.remove();
+                }, 1000);
+            });
+        });
+    </script>
+</body>
+</html>
